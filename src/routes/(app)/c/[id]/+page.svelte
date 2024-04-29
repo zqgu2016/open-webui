@@ -34,6 +34,7 @@
 
 	import MessageInput from '$lib/components/chat/MessageInput.svelte';
 	import Messages from '$lib/components/chat/Messages.svelte';
+	import VirtualHuman from '$lib/components/chat/VirtualHuman.svelte';
 	import Navbar from '$lib/components/layout/Navbar.svelte';
 
 	import {
@@ -919,4 +920,5 @@
 			/>
 		</div>
 	</div>
+	<VirtualHuman />
 {/if}

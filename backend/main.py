@@ -30,6 +30,8 @@ from apps.images.main import app as images_app
 from apps.rag.main import app as rag_app
 from apps.web.main import app as webui_app
 
+from apps.virtual_human.main import app as virtual_human_app
+
 import asyncio
 from pydantic import BaseModel
 from typing import List
@@ -189,6 +191,8 @@ app.mount("/openai/api", openai_app)
 app.mount("/images/api/v1", images_app)
 app.mount("/audio/api/v1", audio_app)
 app.mount("/rag/api/v1", rag_app)
+
+app.mount("/virtual_human", virtual_human_app)
 
 
 @app.get("/api/config")
