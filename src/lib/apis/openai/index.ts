@@ -215,6 +215,10 @@ export const generateOpenAIChatCompletion = async (
 	const controller = new AbortController();
 	let error = null;
 
+	if (/^azure/.test(body.model) && body.num_ctx) {
+		delete body.num_ctx
+	}
+
 	const res = await fetch(`${url}/chat/completions`, {
 		signal: controller.signal,
 		method: 'POST',
