@@ -1,7 +1,21 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
+
 	import { WEBUI_BASE_URL } from '$lib/constants';
 
+	export let show = false;
+
 	let pc: RTCPeerConnection;
+
+	$: if (show) {
+		start();
+	} else {
+		stop();
+	}
+
+	onDestroy(() => {
+		stop();
+	});
 
 	function start() {
 		pc = new RTCPeerConnection();
@@ -39,15 +53,12 @@
 	}
 
 	function stop() {
-		pc.close();
+		pc && pc.close();
 	}
 </script>
 
-<div style="paddling-bottom: 30px; display: flex; flex-direction: column; justify-content: center;">
-	<h3>Virtual Human Demo</h3>
-	<video width="400" height="400" />
-	<div style="margin-top: 30px">
-		<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" on:click={start}>Start</button>
-		<button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" on:click={stop}>Stop</button>
+{#if show}
+	<div class="fixed z-20 top-10 bottom-10 right-10 w-80 flex justify-center align-middle">
+		<video width="400" height="300" />
 	</div>
-</div>
+{/if}

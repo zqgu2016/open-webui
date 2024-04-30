@@ -35,6 +35,7 @@
 	import ShortcutsModal from '$lib/components/chat/ShortcutsModal.svelte';
 	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+	import VirtualHuman from '$lib/components/chat/VirtualHuman.svelte';
 
 	const i18n = getContext('i18n');
 
@@ -44,6 +45,7 @@
 	let DB = null;
 	let localDBChats = [];
 
+	let showVirtualHuman = false;
 	let showShortcuts = false;
 
 	const getModels = async () => {
@@ -177,6 +179,19 @@
 </script>
 
 <div class=" hidden lg:flex fixed bottom-0 right-0 px-3 py-3 z-10">
+	<button
+		id="show-virtual-human-button"
+		class="w-12 h-12 mr-4"
+		on:click={() => {
+			showVirtualHuman = !showVirtualHuman;
+		}}
+	>
+		<img
+			src={`/assets/images/robot${showVirtualHuman ? '_active' : ''}.png`}
+			class="w-12 h-12"
+			alt="robot"
+		/>
+	</button>
 	<Tooltip content="Help" placement="left">
 		<button
 			id="show-shortcuts-button"
@@ -191,6 +206,7 @@
 	</Tooltip>
 </div>
 
+<VirtualHuman bind:show={showVirtualHuman} />
 <ShortcutsModal bind:show={showShortcuts} />
 
 <div class="app relative">

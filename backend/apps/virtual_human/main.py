@@ -34,7 +34,7 @@ class Answer(BaseModel):
 async def create_offer(offer: Offer):
     offer = RTCSessionDescription(sdp=offer.sdp, type=offer.type)
     pc = RTCPeerConnection()
-    player = MediaPlayer(os.path.join(ROOT, "sample.mp4"))
+    player = MediaPlayer(os.path.join(ROOT, "sample.mp4"), loop=True)
 
     pc.addTrack(player.video)
     pc.addTrack(player.audio)
