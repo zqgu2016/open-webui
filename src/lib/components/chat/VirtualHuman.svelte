@@ -1,17 +1,28 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
-	import { WEBUI_BASE_URL } from '$lib/constants';
+	import { virtualHumanWs } from '$lib/stores';
+
+	const host = '20.243.127.11';
 
 	export let show = false;
 
 	let pc: RTCPeerConnection;
+	let ws: WebSocket;
 
 	$: if (show) {
 		start();
 	} else {
 		stop();
 	}
+
+	onMount(() => {
+		ws = new WebSocket(`ws://${host}:8000/humanecho`);
+		ws.onopen = () => {};
+		ws.onmessage = () => {};
+		ws.onclose = () => {};
+		virtualHumanWs.set(ws);
+	});
 
 	onDestroy(() => {
 		stop();
@@ -38,22 +49,24 @@
 	async function negotiate() {
 		await pc.setLocalDescription(await pc.createOffer());
 
-		const res = await fetch(`${WEBUI_BASE_URL}/virtual_human/offer`, {
+		const res = await fetch(`http://${host}:1985/rtc/v1/whep/?app=live&stream=livestream`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/sdp'
 			},
-			body: JSON.stringify({
-				sdp: pc.localDescription.sdp,
-				type: pc.localDescription.type
-			})
+			body: pc.localDescription?.sdp
 		});
-		const answer = await res.json();
-		await pc.setRemoteDescription(answer);
+		const answer = await res.text();
+		await pc.setRemoteDescription({
+			type: 'answer',
+			sdp: answer
+		});
 	}
 
 	function stop() {
-		pc && pc.close();
+		pc?.close();
+		ws?.close();
+		virtualHumanWs.set(null);
 	}
 </script>
 

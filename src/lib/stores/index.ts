@@ -38,6 +38,8 @@ export const settings: Writable<Settings> = writable({});
 export const showSidebar = writable(false);
 export const showSettings = writable(false);
 export const showChangelog = writable(false);
+export const showVirtualHuman = writable(false);
+export const virtualHumanWs = writable<WebSocket|null>(null);
 
 type Model = OpenAIModel | OllamaModel;
 

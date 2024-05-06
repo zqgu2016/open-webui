@@ -15,7 +15,9 @@
 		config,
 		WEBUI_NAME,
 		tags as _tags,
-		showSidebar
+		showSidebar,
+		showVirtualHuman,
+		virtualHumanWs
 	} from '$lib/stores';
 	import { copyToClipboard, splitStream, convertMessagesToHistory } from '$lib/utils';
 
@@ -428,6 +430,10 @@
 										responseMessage.content += data.message.content;
 										messages = messages;
 									}
+
+									if ($showVirtualHuman && $virtualHumanWs) {
+										$virtualHumanWs.send(data.message.content);
+									}
 								} else {
 									responseMessage.done = true;
 
@@ -643,6 +649,10 @@
 				} else {
 					responseMessage.content += value;
 					messages = messages;
+				}
+
+				if ($showVirtualHuman && $virtualHumanWs) {
+					$virtualHumanWs.send(value);
 				}
 
 				if ($settings.notificationEnabled && !document.hasFocus()) {

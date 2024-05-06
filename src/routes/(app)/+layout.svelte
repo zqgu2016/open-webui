@@ -25,6 +25,7 @@
 		documents,
 		tags,
 		showChangelog,
+		showVirtualHuman,
 		config
 	} from '$lib/stores';
 	import { REQUIRED_OLLAMA_VERSION, WEBUI_API_BASE_URL } from '$lib/constants';
@@ -45,7 +46,6 @@
 	let DB = null;
 	let localDBChats = [];
 
-	let showVirtualHuman = false;
 	let showShortcuts = false;
 
 	const getModels = async () => {
@@ -183,11 +183,11 @@
 		id="show-virtual-human-button"
 		class="w-12 h-12 mr-4"
 		on:click={() => {
-			showVirtualHuman = !showVirtualHuman;
+			showVirtualHuman.set(!$showVirtualHuman);
 		}}
 	>
 		<img
-			src={`/assets/images/robot${showVirtualHuman ? '_active' : ''}.png`}
+			src={`/assets/images/robot${$showVirtualHuman ? '_active' : ''}.png`}
 			class="w-12 h-12"
 			alt="robot"
 		/>
@@ -206,7 +206,7 @@
 	</Tooltip>
 </div>
 
-<VirtualHuman bind:show={showVirtualHuman} />
+<VirtualHuman bind:show={$showVirtualHuman} />
 <ShortcutsModal bind:show={showShortcuts} />
 <SettingsModal bind:show={$showSettings} />
 <ChangelogModal bind:show={$showChangelog} />
