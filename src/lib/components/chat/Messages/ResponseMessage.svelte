@@ -261,6 +261,7 @@
 							}
 						};
 						speak.voice = voice;
+						speak.lang = $i18n.language;
 						speechSynthesis.speak(speak);
 					}
 				}, 100);

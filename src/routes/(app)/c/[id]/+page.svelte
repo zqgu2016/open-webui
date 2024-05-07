@@ -45,6 +45,7 @@
 		WEBUI_BASE_URL
 	} from '$lib/constants';
 	import { createOpenAITextStream } from '$lib/apis/streaming';
+	import { checkSentenceEnd, ResCache } from '$lib/utils/virtualHuman';
 
 	const i18n = getContext('i18n');
 
@@ -62,6 +63,8 @@
 	let atSelectedModel = '';
 
 	let selectedModelfile = null;
+
+	let resCache = new ResCache();
 
 	$: selectedModelfile =
 		selectedModels.length === 1 &&
@@ -289,6 +292,8 @@
 						];
 					}
 
+					resCache.flush();
+
 					if (model?.external) {
 						await sendPromptOpenAI(model, prompt, responseMessageId, _chatId);
 					} else if (model) {
@@ -429,10 +434,7 @@
 									} else {
 										responseMessage.content += data.message.content;
 										messages = messages;
-									}
-
-									if ($showVirtualHuman && $virtualHumanWs) {
-										$virtualHumanWs.send(data.message.content);
+										resCache.push(data.message.content);
 									}
 								} else {
 									responseMessage.done = true;
@@ -480,6 +482,8 @@
 										document.getElementById(`speak-button-${responseMessage.id}`)?.click();
 									}
 								}
+
+								sendMsgToVirtualHuman(data.message.content, data.done);
 							}
 						}
 					}
@@ -637,6 +641,8 @@
 					responseMessage.done = true;
 					messages = messages;
 
+					sendMsgToVirtualHuman(value, done);
+
 					if (stopResponseFlag) {
 						controller.abort('User: Stop Response');
 					}
@@ -649,11 +655,10 @@
 				} else {
 					responseMessage.content += value;
 					messages = messages;
+					resCache.push(value);
+					sendMsgToVirtualHuman(value, done);
 				}
 
-				if ($showVirtualHuman && $virtualHumanWs) {
-					$virtualHumanWs.send(value);
-				}
 
 				if ($settings.notificationEnabled && !document.hasFocus()) {
 					const notification = new Notification(`OpenAI ${model}`, {
@@ -854,6 +859,14 @@
 		});
 
 		_tags.set(await getAllChatTags(localStorage.token));
+	};
+
+	const sendMsgToVirtualHuman = (value: string, done: boolean) => {
+		const isSentenceEnd = done || checkSentenceEnd(value);
+		if ($showVirtualHuman && $virtualHumanWs && isSentenceEnd) {
+			$virtualHumanWs.send(resCache.content);
+			resCache.flush();
+		}
 	};
 
 	onMount(async () => {
