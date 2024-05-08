@@ -43,6 +43,7 @@
 	import { LITELLM_API_BASE_URL, OLLAMA_API_BASE_URL, OPENAI_API_BASE_URL } from '$lib/constants';
 	import { WEBUI_BASE_URL } from '$lib/constants';
 	import { createOpenAITextStream } from '$lib/apis/streaming';
+	import { checkSentenceEnd, ResCache } from '$lib/utils/virtualHuman';
 
 	const i18n = getContext('i18n');
 
@@ -86,6 +87,8 @@
 		messages: {},
 		currentId: null
 	};
+
+	let resCache = new ResCache();
 
 	$: if (history.currentId !== null) {
 		let _messages = [];
@@ -277,6 +280,8 @@
 						];
 					}
 
+					resCache.flush();
+
 					if (model?.external) {
 						await sendPromptOpenAI(model, prompt, responseMessageId, _chatId);
 					} else if (model) {
@@ -417,10 +422,7 @@
 									} else {
 										responseMessage.content += data.message.content;
 										messages = messages;
-									}
-
-									if ($showVirtualHuman && $virtualHumanWs) {
-										$virtualHumanWs.send(data.message.content);
+										resCache.push(data.message.content);
 									}
 								} else {
 									responseMessage.done = true;
@@ -468,6 +470,8 @@
 										document.getElementById(`speak-button-${responseMessage.id}`)?.click();
 									}
 								}
+
+								sendMsgToVirtualHuman(data.message.content, data.done);
 							}
 						}
 					}
@@ -625,6 +629,8 @@
 					responseMessage.done = true;
 					messages = messages;
 
+					sendMsgToVirtualHuman(value, done);
+
 					if (stopResponseFlag) {
 						controller.abort('User: Stop Response');
 					}
@@ -637,10 +643,8 @@
 				} else {
 					responseMessage.content += value;
 					messages = messages;
-				}
-
-				if ($showVirtualHuman && $virtualHumanWs) {
-					$virtualHumanWs.send(value);
+					resCache.push(value);
+					sendMsgToVirtualHuman(value, done);
 				}
 
 				if ($settings.notificationEnabled && !document.hasFocus()) {
@@ -842,6 +846,14 @@
 		});
 
 		_tags.set(await getAllChatTags(localStorage.token));
+	};
+
+	const sendMsgToVirtualHuman = (value: string, done: boolean) => {
+		const isSentenceEnd = done || checkSentenceEnd(value);
+		if ($showVirtualHuman && $virtualHumanWs && isSentenceEnd) {
+			$virtualHumanWs.send(resCache.content);
+			resCache.flush();
+		}
 	};
 </script>
 
