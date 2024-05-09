@@ -243,7 +243,8 @@ export const generateOpenAIChatCompletion = async (
 export const synthesizeOpenAISpeech = async (
 	token: string = '',
 	speaker: string = 'alloy',
-	text: string = ''
+	text: string = '',
+	model: string = 'tts-1'
 ) => {
 	let error = null;
 
@@ -254,7 +255,7 @@ export const synthesizeOpenAISpeech = async (
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			model: 'tts-1',
+			model: model,
 			input: text,
 			voice: speaker
 		})
@@ -299,7 +300,9 @@ export const generateTitle = async (
 					content: template
 				}
 			],
-			stream: false
+			stream: false,
+			// Restricting the max tokens to 50 to avoid long titles
+			max_tokens: 50
 		})
 	})
 		.then(async (res) => {
@@ -318,5 +321,5 @@ export const generateTitle = async (
 		throw error;
 	}
 
-	return res?.choices[0]?.message?.content ?? 'New Chat';
+	return res?.choices[0]?.message?.content.replace(/["']/g, '') ?? 'New Chat';
 };

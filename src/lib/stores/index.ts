@@ -104,6 +104,7 @@ type AudioSettings = {
 	STTEngine?: string;
 	TTSEngine?: string;
 	speaker?: string;
+	model?: string;
 };
 
 type TitleSettings = {
