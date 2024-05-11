@@ -1,4 +1,9 @@
 general_settings: {}
 litellm_settings: {}
-model_list: []
+model_list:
+- litellm_params:
+    api_base: os.environ/AZURE_API_BASE
+    api_key: os.environ/AZURE_API_KEY
+    model: azure/gpt-35-turbo-16k
+  model_name: azure/gpt-35-turbo-16k
 router_settings: {}
